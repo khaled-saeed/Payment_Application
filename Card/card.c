@@ -8,7 +8,7 @@ EN_cardError_t getCardHolderName(ST_cardData_t *cardData)
 printf("Please Enter Your name ");
     gets(cardData->cardHolderName);
     int len = strlen(cardData->cardHolderName);
-    if(*cardData->cardHolderName == '\0'|| len <20 || len>24)
+    if(*cardData->cardHolderName == '\0'|| len <19 || len>24)
     {
         return WRONG_NAME ;
     }
