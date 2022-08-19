@@ -3,6 +3,6 @@
 int main()
 {
     ST_cardData_t c1 ; 
-    getCardHolderName(&c1); 
+    printf("%d",getCardHolderName(&c1)); 
 
 }

@@ -11,7 +11,10 @@ uint8_t cardExpirationDate[6];
 
 typedef enum EN_cardError_t
 {
-OK, WRONG_NAME, WRONG_EXP_DATE, WRONG_PAN
+CARD_OK,
+WRONG_NAME, 
+WRONG_EXP_DATE, 
+WRONG_PAN
 }EN_cardError_t;
 
 EN_cardError_t getCardHolderName(ST_cardData_t *cardData);
