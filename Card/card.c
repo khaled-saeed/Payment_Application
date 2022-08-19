@@ -5,11 +5,10 @@
 
 EN_cardError_t getCardHolderName(ST_cardData_t *cardData)
 {
-printf("Please Enter Your name ");
-    char name[25] = "\0"; 
-    fgets(name,25,stdin) ;                
+    printf("Please Enter Your name :");
+    char name[26] = "\0"; 
+    scanf("%26s",name) ;                
     int len = strlen(name);
-    len--;                                      // because fgets() adds a new line character at the end of the string 
     strcpy(cardData->cardHolderName , name); 
     //printf("len: %d\n",len);
     //printf("string : %s",name);  
@@ -25,11 +24,10 @@ printf("Please Enter Your name ");
 }
 EN_cardError_t getCardExpiryDate(ST_cardData_t *cardData)
 {
-    printf("Please Enter  the card expiration date ");
-    char Ex_date[6] = "\0"; 
-    fgets(Ex_date,6,stdin) ;                
+    printf("Please Enter  the card expiration date : ");
+    char Ex_date[7] = "\0"; 
+    scanf("%7s",Ex_date) ;                
     int len = strlen(Ex_date);
-    len--; 
     strcpy(cardData->cardExpirationDate, Ex_date); 
     if(*cardData->cardExpirationDate == '\0'|| len <5 || len>5)
     {
@@ -43,11 +41,10 @@ EN_cardError_t getCardExpiryDate(ST_cardData_t *cardData)
 }
 EN_cardError_t getCardPAN(ST_cardData_t *cardData)
 {
-    printf("Please enter the card's Primary Account Number ? ") ; 
-   char PAN[20] = "\0"; 
-    fgets(PAN,20,stdin) ;                
+    printf("Please enter the card's Primary Account Number : ") ; 
+    char PAN[21] = "\0"; 
+    scanf("%21s",PAN) ;                
     int len = strlen(PAN);
-    len-- ; 
     strcpy(cardData->primaryAccountNumber, PAN); 
     if(*cardData->primaryAccountNumber == '\0'|| len <16 || len>19)
     {
