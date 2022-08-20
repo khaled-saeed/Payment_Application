@@ -26,7 +26,7 @@ ST_accountsDB_t DataBase[255]={ {2000.0, RUNNING, "8989374615436851"},
 
 ST_transaction_t TransDataBase[255]={0}; 
 uint8_t accountIndex; 
-uint8_t transactionIndex; 
+uint8_t transactionIndex = 0 ; 
 uint8_t totalNumberOfAccounts = 20;
 EN_transStat_t receiveTransactionData(ST_transaction_t *transData)
 {
@@ -39,21 +39,25 @@ EN_transStat_t receiveTransactionData(ST_transaction_t *transData)
            {
              DataBase[accountIndex].balance -= transData->terminalData.transAmount;
              saveTransaction(transData);
-             transData->transState = APPROVED ; 
+             transData->transState = APPROVED ;
+              //printf("APPROVED\n");                       // For debugging purposes
              return APPROVED; 
            }
            else
            {
+             //printf("DECLINED_INSUFFICIENT_FUND\n");          // For debugging purposes
             return DECLINED_INSUFFICIENT_FUND ;
            }
         }
         else
         {
+           //  printf("DECLINED_STOLEN_CARD\n");                // For debugging purposes
             return DECLINED_STOLEN_CARD;
         }
     }
     else
     {
+         //printf("FRAUD_CARD\n");                              // For debugging purposes
         return FRAUD_CARD ; 
     }
 
@@ -64,15 +68,17 @@ EN_serverError_t isValidAccount(ST_cardData_t *cardData, ST_accountsDB_t *accoun
     int i ; 
     for(i = 0 ; i < totalNumberOfAccounts ; i++)
     {
-        if(cardData->primaryAccountNumber == DataBase[i].primaryAccountNumber)
+        if(!strncmp(cardData->primaryAccountNumber , DataBase[i].primaryAccountNumber,16))
         {
             accountReference->balance = DataBase[i].balance ; 
             strcpy(accountReference->primaryAccountNumber ,DataBase[i].primaryAccountNumber); 
             accountReference->state = DataBase[i].state; 
             accountIndex = i ; 
+            //printf("SERVER_OK\n");                                // For debugging purposes
             return SERVER_OK ; 
         }
     }
+    //printf("ACCOUNT_NOT_FOUND\n");                                // For debugging purposes
     return ACCOUNT_NOT_FOUND ;
 }
 
@@ -80,10 +86,12 @@ EN_serverError_t isBlockedAccount(ST_accountsDB_t *accountReference)
 {
     if(accountReference->state == BLOCKED)
     {
+        //printf("BLOCKED_ACCOUNT\n");                              // For debugging purposes
         return BLOCKED_ACCOUNT; 
     }
     else
     {
+       // printf("SERVER_OK\n");                                    // For debugging purposes
         return SERVER_OK ; 
     }
 }
@@ -92,27 +100,29 @@ EN_serverError_t isAmountAvailable(ST_terminalData_t *termData, ST_accountsDB_t 
 {
    if( termData->transAmount <= accountReference->balance)
    {
+        //printf("SERVER_OK\n");                                        // For debugging purposes
         return SERVER_OK ; 
    }
    else
    {
-    return LOW_BALANCE ; 
+        //printf("LOW_BALANCE\n");                                      // For debugging purposes
+        return LOW_BALANCE ; 
    }
 }
 
 EN_serverError_t saveTransaction(ST_transaction_t *transData)
 {
-    TransDataBase[transactionIndex].cardHolderData.cardExpirationDate = transData->cardHolderData.cardExpirationDate;
-    TransDataBase[transactionIndex].cardHolderData.cardHolderName = transData->cardHolderData.cardHolderName;
-    TransDataBase[transactionIndex].cardHolderData.primaryAccountNumber = transData->cardHolderData.primaryAccountNumber;
-    TransDataBase[transactionIndex].terminalData.maxTransAmount=transData->terminalData.maxTransAmount;
-    TransDataBase[transactionIndex].terminalData.transactionDate = transData->terminalData.transactionDate; 
+    strcpy(TransDataBase[transactionIndex].cardHolderData.cardExpirationDate , transData->cardHolderData.cardExpirationDate);
+    strcpy(TransDataBase[transactionIndex].cardHolderData.cardHolderName , transData->cardHolderData.cardHolderName);
+    strcpy(TransDataBase[transactionIndex].cardHolderData.primaryAccountNumber , transData->cardHolderData.primaryAccountNumber);
+    TransDataBase[transactionIndex].terminalData.maxTransAmount = transData->terminalData.maxTransAmount;
+    strcpy(TransDataBase[transactionIndex].terminalData.transactionDate , transData->terminalData.transactionDate); 
     TransDataBase[transactionIndex].terminalData.transAmount = transData->terminalData.transAmount;
-    TransDataBase[transactionIndex].transactionSequenceNumber= TransDataBase[transactionIndex].transactionSequenceNumber+1; 
-    TransDataBase[transactionIndex].transState = transData->transState ;
-    transactionIndex++ ; 
-    // i can't implement the saving check because i'm not saving to a real server so i can get a feed back whether the saving succeeded or not 
-
+    TransDataBase[transactionIndex].transactionSequenceNumber= transactionIndex+1;  
+    printf("Transaction number : %d\n",TransDataBase[transactionIndex].transactionSequenceNumber);
+    printf("The remaining balance : %f\n",DataBase[accountIndex].balance); 
+    printf("Transaction Saved\n"); 
+    transactionIndex++ ;
 }
 
 EN_serverError_t getTransaction(uint32_t transactionSequenceNumber, ST_transaction_t *transData)
@@ -122,12 +132,13 @@ EN_serverError_t getTransaction(uint32_t transactionSequenceNumber, ST_transacti
     {
         if(TransDataBase[i].transactionSequenceNumber == transactionSequenceNumber)
         {
-            transData = TransDataBase[i]; 
+            *transData = TransDataBase[i]; 
+            //printf("SERVER_OK\n");                            //for debugging purposes
             return SERVER_OK ; 
         }
-        else
-        {
-            return TRANSACTION_NOT_FOUND ; 
-        }
+      
+            //printf("TRANSACTION_NOT_FOUND\n");                //for debugging purposes
+            
     }
+    return TRANSACTION_NOT_FOUND ;
 }
